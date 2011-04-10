@@ -3,6 +3,8 @@ from urllib2 import urlopen, Request
 from urllib import quote as urlencode
 from simplejson import load as loadjson
 
+from persist import Session, Nag
+
 def soupUp(url):
     html = urlopen(url).read()
     soup = BeautifulSoup(html)
@@ -49,6 +51,13 @@ def pressMentions(term):
     except: 
         return 0
 
-for runner in getTodaysRunners():
-    print runner + ", " + str(pressMentions(runner))
+def doWork():
+    session = Session()
+    for runner in getTodaysRunners():
+        print runner + ", " + str(pressMentions(runner))
+        nag = Nag(runner)
+        session.merge(nag)
+    session.commit()
+
+doWork()
 
