@@ -3,7 +3,7 @@ from urllib2 import urlopen, Request
 from urllib import quote as urlencode
 from simplejson import load as loadjson
 
-from persist import Session, Nag
+from persist import Session, Nag, Run
 
 def soupUp(url):
     html = urlopen(url).read()
@@ -30,13 +30,28 @@ def getTodaysRaces(url):
             continue
     return cardurls
 
-todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date=2011-04-14"
+
+def getMeetingDetails(url):
+    soup = soupUp(url)
+    meeting = soup.findAll("h1", {"class": "cardHeadline"})[0]
+    return meeting.contents[2].strip()
+
+
+todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date=2011-04-17"
 
 def getTodaysRunners():
     nags = []
     for cardurl in getTodaysRaces(todayurl):
         nags.extend(getNags(cardurl))
     return nags
+
+def getMeetings():
+    meetings = []
+    for cardurl in getTodaysRaces(todayurl):
+        location = getMeetingDetails(cardurl)
+        for nag in getNags(cardurl):
+            meetings.append( ( nag , location) )
+    return meetings
 
 
 googlenewsurl = "https://ajax.googleapis.com/ajax/services/search/news?v=1.0" + \
@@ -53,11 +68,10 @@ def pressMentions(term):
 
 def doWork():
     session = Session()
-    for runner in getTodaysRunners():
-        print runner + ", " + str(pressMentions(runner))
-        nag = Nag(runner)
-        session.merge(nag)
+    for runn in getMeetings():
+        run = Run(runn[0], runn[1], "12:00")
+        print run
+        session.merge(run)
     session.commit()
 
 doWork()
-

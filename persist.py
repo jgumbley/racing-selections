@@ -13,6 +13,15 @@ nag_table = Table(
         Column('created_date', DateTime(timezone=False)),
         )
 
+run_table = Table(
+        'runs', meta,
+        Column('id', Integer, primary_key=True),
+        Column('location', String, nullable=False),
+        Column('nag', String, nullable=False),
+        Column('time', String, nullable=False),
+        Column('created_date', DateTime(timezone=False)),
+        )
+
 class Nag(object):
 
     def __init__(self, name):
@@ -22,15 +31,17 @@ class Nag(object):
     def __repr__(self):
         return "<Nag('%s')>" % (self.name)
 
-mapper(Nag, nags)
+class Run(object):
 
-def create_tables():
-    Session=sessionmaker(bind=engine)
-    session=Session()
-    nag1 = Nag("RED RUM")
-    session.add(nag1)
-    session.commit()
+    def __init__(self, location, nag, time):
+        self.location = location
+        self.nag = nag
+        self.time= time
+        self.created_date = datetime.now()
 
-if __name__=='__main__':
-    print "yo bliar"
-    create_tables()
+    def __repr__(self):
+        return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, self.time)
+
+mapper(Nag, nag_table)
+mapper(Run, run_table)
+
