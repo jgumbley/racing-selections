@@ -1,20 +1,19 @@
 from sqlalchemy import create_engine
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker 
+from sqlalchemy import Table, Column, Integer, String, ForeignKey, DateTime, MetaData
+from sqlalchemy.orm import sessionmaker, mapper 
 from datetime import datetime
 
+meta = MetaData()
 engine = create_engine('postgresql://nags_dbuser:c0ns0le@localhost:5432/nags')
-
-Base = declarative_base()
-
 Session=sessionmaker(bind=engine)
 
-class Nag(Base):
-    __tablename__ = 'nags'
+nag_table = Table(
+        'nags', meta,
+        Column('name', String(length=None),  primary_key=True, nullable=False),
+        Column('created_date', DateTime(timezone=False)),
+        )
 
-    name =          Column(String, primary_key=True)
-    created_date =  Column(DateTime)
+class Nag(object):
 
     def __init__(self, name):
         self.name = name
@@ -23,9 +22,9 @@ class Nag(Base):
     def __repr__(self):
         return "<Nag('%s')>" % (self.name)
 
+mapper(Nag, nags)
 
 def create_tables():
-    Base.metadata.create_all(engine)
     Session=sessionmaker(bind=engine)
     session=Session()
     nag1 = Nag("RED RUM")
