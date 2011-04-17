@@ -2,6 +2,8 @@ from BeautifulSoup import BeautifulSoup
 from urllib2 import urlopen, Request
 from urllib import quote as urlencode
 from simplejson import load as loadjson
+from datetime import datetime
+import inspect
 
 from persist import Session, Nag, Run
 
@@ -10,47 +12,55 @@ def soupUp(url):
     soup = BeautifulSoup(html)
     return soup
 
-def getNags(url):
-    soup = soupUp(url)
-    nags = []
-    for horsesoup in soup.findAll("table", {"class":'cardSt'}):
-        for possiblehorse in horsesoup.findAll("b"):
-            if len(possiblehorse.text) > 5:
-                nags.append(possiblehorse.text.strip())
-    return nags
+class Scraper(object):
+    def doInit(self, url):
+        self.url = url
+        self.soup = soupUp(url)
+        self.doScrape()
 
-def getTodaysRaces(url):
-    soup = soupUp(url)
-    cardurls = []
-    for cardsoup in soup.findAll("td", {"class": 'crd bull'}):
-        try:
-            cardurl = cardsoup.contents[1]["href"]
-            cardurls.append(cardurl)
-        except:
-            continue
-    return cardurls
+    def doScrape(self):
+        m = inspect.getmembers(self, predicate=inspect.ismethod)
+        for item in m:
+            if str(item[0])[:6] in "scrape":
+                item[1]()
 
+class RPTodayRaces(Scraper):
+    todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date="
 
-def getMeetingDetails(url):
-    soup = soupUp(url)
-    meeting = soup.findAll("h1", {"class": "cardHeadline"})[0]
-    return meeting.contents[2].strip()
+    def __init__(self, date):
+        self.doInit( self.todayurl + date.isoformat()[:10] )
 
+    def scrapeTodaysRaces(self):
+        self.cardurls = []
+        for cardsoup in self.soup.findAll("td", {"class": 'crd bull'}):
+            try:
+                cardurl = cardsoup.contents[1]["href"]
+                self.cardurls.append(cardurl)
+            except:
+                continue
+        
+class RPRaceCard(Scraper):
+    def __init__(self, url):
+        self.doInit( url )
 
-todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date=2011-04-17"
+    def scrapeMeetingDetails(self):
+        meeting = self.soup.findAll("h1", {"class": "cardHeadline"})[0]
+        self.location = meeting.contents[2].strip()
 
-def getTodaysRunners():
-    nags = []
-    for cardurl in getTodaysRaces(todayurl):
-        nags.extend(getNags(cardurl))
-    return nags
+    def scrapeNags(self):
+        nags = []
+        for horsesoup in self.soup.findAll("table", {"class":'cardSt'}):
+            for possiblehorse in horsesoup.findAll("b"):
+                if len(possiblehorse.text) > 5:
+                    nags.append(possiblehorse.text.strip())
+        self.runners = nags
 
 def getMeetings():
     meetings = []
-    for cardurl in getTodaysRaces(todayurl):
-        location = getMeetingDetails(cardurl)
-        for nag in getNags(cardurl):
-            meetings.append( ( nag , location) )
+    for cardurl in RPTodayRaces(datetime.now()).cardurls:
+        scrape = RPRaceCard( cardurl )
+        for nag in scrape.runners:
+            meetings.append( ( nag , scrape.location) )
     return meetings
 
 
