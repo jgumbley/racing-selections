@@ -30,7 +30,7 @@ def getTodaysRaces(url):
             continue
     return cardurls
 
-todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date=2011-04-10"
+todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date=2011-04-14"
 
 def getTodaysRunners():
     nags = []

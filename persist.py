@@ -23,6 +23,7 @@ class Nag(Base):
     def __repr__(self):
         return "<Nag('%s')>" % (self.name)
 
+
 def create_tables():
     Base.metadata.create_all(engine)
     Session=sessionmaker(bind=engine)
