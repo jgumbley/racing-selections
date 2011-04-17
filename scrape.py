@@ -1,9 +1,7 @@
 from BeautifulSoup import BeautifulSoup
 from urllib2 import urlopen, Request
-from urllib import quote as urlencode
-from simplejson import load as loadjson
 from datetime import datetime
-import inspect
+from inspect import getmembers, ismethod
 
 from persist import Session, Nag, Run
 
@@ -19,10 +17,14 @@ class Scraper(object):
         self.doScrape()
 
     def doScrape(self):
-        m = inspect.getmembers(self, predicate=inspect.ismethod)
-        for item in m:
-            if str(item[0])[:6] in "scrape":
-                item[1]()
+        """This introspects all methods of the class and calls ones which 
+        start with scrape. I suppose this might be problematic if you used 
+        multiple inheritance but at the moment I don't care.
+        """
+        methods = getmembers(self, predicate=ismethod)
+        for method in methods:
+            if str(method[0])[:6] in "scrape":
+                method[1]()
 
 class RPTodayRaces(Scraper):
     todayurl = "http://www.racingpost.com/horses2/cards/home.sd?r_date="
@@ -62,19 +64,6 @@ def getMeetings():
         for nag in scrape.runners:
             meetings.append( ( nag , scrape.location) )
     return meetings
-
-
-googlenewsurl = "https://ajax.googleapis.com/ajax/services/search/news?v=1.0" + \
-        "&q=SEARCH&key=ABQIAAAAyABxmfS34tEMlt2UD9HT2hSN4OZNJRcNb-mTkbWyVBE6-ADJ1BSpSdvs_0bBvtx5eI3evqY9t0U4rA&userip=87.113.4.205"
-
-def pressMentions(term):
-    enc_term = urlencode('source:"racing post" "' + term + '"')
-    request = urlopen(googlenewsurl.replace("SEARCH", enc_term))
-    results = loadjson(request)
-    try:
-        return results["responseData"]['cursor']['estimatedResultCount']
-    except: 
-        return 0
 
 def doWork():
     session = Session()
