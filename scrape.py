@@ -45,9 +45,20 @@ class RPRaceCard(Scraper):
     def __init__(self, url):
         self.doInit( url )
 
-    def scrapeMeetingDetails(self):
+    def scrapeLocationAndTime(self):
         meeting = self.soup.findAll("h1", {"class": "cardHeadline"})[0]
         self.location = meeting.contents[2].strip()
+        timesoup = meeting.findAll("span")
+        self.time = timesoup[0] 
+        if len(timesoup[0].contents) == 3:
+            if timesoup[0].contents[0].strip() not in "":
+                self.time = timesoup[0].contents[0].strip()
+            else: 
+                self.time = timesoup[0].contents[2].strip()
+        else:
+            self.time = timesoup[0].contents[2].strip()
+        if self.time in '':
+            raise Exception
 
     def scrapeNags(self):
         nags = []
@@ -62,13 +73,13 @@ def getMeetings():
     for cardurl in RPTodayRaces(datetime.now()).cardurls:
         scrape = RPRaceCard( cardurl )
         for nag in scrape.runners:
-            meetings.append( ( nag , scrape.location) )
+            meetings.append( ( nag , scrape.location, scrape.time) )
     return meetings
 
 def doWork():
     session = Session()
     for runn in getMeetings():
-        run = Run(runn[0], runn[1], "12:00")
+        run = Run(runn[1], runn[0], runn[2])
         print run
         session.merge(run)
     session.commit()
