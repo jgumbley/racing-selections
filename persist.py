@@ -18,7 +18,7 @@ run_table = Table(
         Column('id', Integer, primary_key=True),
         Column('location', String, nullable=False),
         Column('nag', String, nullable=False),
-        Column('time', String, nullable=False),
+        Column('start_time', DateTime, nullable=False),
         Column('created_date', DateTime(timezone=False)),
         )
 
@@ -36,11 +36,11 @@ class Run(object):
     def __init__(self, location, nag, time):
         self.location = location
         self.nag = nag
-        self.time= time
+        self.start_time= time
         self.created_date = datetime.now()
 
     def __repr__(self):
-        return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, self.time)
+        return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, str(self.time))
 
 mapper(Nag, nag_table)
 mapper(Run, run_table)
