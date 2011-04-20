@@ -33,14 +33,18 @@ class Nag(object):
 
 class Run(object):
 
-    def __init__(self, location, nag, time):
+    def __init__(self, location, nag, str_time):
         self.location = location
         self.nag = nag
-        self.start_time= time
+        self.start_time= self.convert_string_to_datetime(str_time)
         self.created_date = datetime.now()
 
+    def convert_string_to_datetime(self, time):
+        today = datetime.now().strftime("%d %b %y")
+        return datetime.strptime(today + " " + time, "%d %b %y %H:%M")
+
     def __repr__(self):
-        return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, str(self.time))
+        return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, str(self.start_time))
 
 mapper(Nag, nag_table)
 mapper(Run, run_table)
