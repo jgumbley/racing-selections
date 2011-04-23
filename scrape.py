@@ -33,11 +33,11 @@ class RPTodayRaces(Scraper):
         self.doInit( self.todayurl + date.isoformat()[:10] )
 
     def scrapeTodaysRaces(self):
-        self.cardurls = []
+        self.cardurls = set() # use set to dedupe
         for cardsoup in self.soup.findAll("td", {"class": 'crd bull'}):
             try:
                 cardurl = cardsoup.contents[1]["href"]
-                self.cardurls.append(cardurl)
+                self.cardurls.add(cardurl)
             except:
                 continue
         
@@ -67,4 +67,8 @@ class RPRaceCard(Scraper):
                 if len(possiblehorse.text) > 5:
                     nags.append(possiblehorse.text.strip())
         self.runners = nags
+
+#card = RPRaceCard("http://www.racingpost.com/horses2/cards/card.sd?race_id=527785&r_date=2011-04-23")
+
+#print card.runners
 
