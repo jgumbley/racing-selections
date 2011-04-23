@@ -65,7 +65,10 @@ class RPRaceCard(Scraper):
         for horsesoup in self.soup.findAll("table", {"class":'cardSt'}):
             for possiblehorse in horsesoup.findAll("b"):
                 if len(possiblehorse.text) > 5:
-                    nags.append(possiblehorse.text.strip())
+                    nag = {}
+                    nag["name"] = possiblehorse.text.strip()
+                    nag["odds"] = 0
+                    nags.append(nag)
         self.runners = nags
 
 #card = RPRaceCard("http://www.racingpost.com/horses2/cards/card.sd?race_id=527785&r_date=2011-04-23")

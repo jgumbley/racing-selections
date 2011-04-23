@@ -2,6 +2,7 @@ from persist import Session, Nag, Run
 from scrape import RPTodayRaces, RPRaceCard
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
+
 def scrapeRuns():
     runs = []
     today = datetime.now()
@@ -10,7 +11,7 @@ def scrapeRuns():
             race_card = RPRaceCard(meetingURL)
             for nag in race_card.runners:
                 runs.append(
-                        Run( nag , race_card.location, race_card.time)
+                        Run( nag["name"] , race_card.location, race_card.time)
                         )
         except Exception, e:
             print e
