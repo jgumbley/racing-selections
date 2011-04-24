@@ -33,7 +33,7 @@ class Nag(object):
 
 class Run(object):
 
-    def __init__(self, location, nag, str_time):
+    def __init__(self, nag, location, str_time):
         self.location = location
         self.nag = nag
         self.start_time= self.convert_string_to_datetime(str_time)
@@ -41,7 +41,7 @@ class Run(object):
 
     def convert_string_to_datetime(self, time):
         today = datetime.now().strftime("%d %b %y")
-        return datetime.strptime(today + " " + time, "%d %b %y %H:%M")
+        return datetime.strptime(today + " " + time + " PM", "%d %b %y %I:%M %p")
 
     def __repr__(self):
         return"<Run('%s'at'%s'at'%s')>" % (self.nag, self.location, str(self.start_time))

@@ -2,6 +2,7 @@ from persist import Session, Nag, Run
 from scrape import RPTodayRaces, RPRaceCard
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
+from logbook import info, warn, error
 
 def scrapeRuns():
     runs = []
@@ -14,7 +15,7 @@ def scrapeRuns():
                         Run( nag["name"] , race_card.location, race_card.time)
                         )
         except Exception, e:
-            print e
+            warn("url=" + meetingURL + " " + str(e))
     return runs
 
 def doWork():
@@ -24,8 +25,9 @@ def doWork():
             session.merge(run)
             session.commit()
         except IntegrityError:
-            print "Duplicate Run: " + str(run)
+            error("Duplicate Run: " + str(run))
             session.rollback()
 
 if __name__=='__main__':
+    info("script='do_daily' event='start'")
     doWork()
