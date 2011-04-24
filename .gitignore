@@ -10,3 +10,4 @@ env_settings.py
 *~
 pip-log.txt
 .ropeproject
+.vagrant
