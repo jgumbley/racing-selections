@@ -66,7 +66,7 @@ class RPRaceCard(Scraper):
             for possiblehorse in horsesoup.findAll("b"):
                 if len(possiblehorse.text) > 5:
                     nag = {}
-                    nag["name"] = possiblehorse.text.strip()
+                    nag["name"] = possiblehorse.text.strip().replace("&acute;", "'")
                     nag["odds"] = 0
                     nags.append(nag)
         self.runners = nags
